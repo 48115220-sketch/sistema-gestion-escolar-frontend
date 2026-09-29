@@ -1,0 +1,30 @@
+<app-navbar></app-navbar>
+
+<div class="container">
+
+  <app-login *ngIf="!apiService.obtenerToken()" (loginExitoso)="onLoginExitoso()"></app-login>
+
+  <div *ngIf="apiService.obtenerToken()">
+    
+    <div class="alert alert-success d-flex justify-content-between align-items-center py-2 mb-4">
+      <span><strong>Autenticación exitosa:</strong> Conectado mediante Token JWT cifrado.</span>
+      <span class="badge bg-success">JWT ACTIVO</span>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <app-alumnos></app-alumnos>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <app-cursos></app-cursos>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <app-personal></app-personal>
+      </div>
+    </div>
+
+  </div>
+
+</div>

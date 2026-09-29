@@ -1,0 +1,12 @@
+<nav class="navbar navbar-dark navbar-escuela mb-4">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+
+        <img src="assets/img/logoF.png" alt="Logo Escuela" class="logo-escuela">
+      <span class="fw-bold fs-4">Plataforma de Gestión Escolar</span>
+    </a>
+    <button *ngIf="apiService.obtenerToken()" class="btn btn-outline-light btn-sm" (click)="onLogout()">
+      Cerrar Sesión
+    </button>
+  </div>
+</nav>

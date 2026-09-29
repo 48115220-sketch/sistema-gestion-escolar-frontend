@@ -1,0 +1,29 @@
+<div class="row justify-content-center my-5">
+  <div class="col-md-4">
+    <div class="card card-escuela">
+      <div class="card-body p-4">
+        <div class="text-center mb-3">
+          <img src="assets/img/logoF.png" width="70" class="mb-2">
+          <h4 class="fw-bold" style="color: var(--rojo-escuela);">Ingreso al Sistema</h4>
+          <p class="text-muted small">Ingresa tus credenciales de administración</p>
+        </div>
+
+        <div *ngIf="errorLogin" class="alert alert-danger py-2 small text-center">
+          Usuario o contraseña incorrectos
+        </div>
+
+        <form (ngSubmit)="onLogin()">
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Usuario</label>
+            <input type="text" [(ngModel)]="credentials.username" name="username" class="form-control" placeholder="Ej: admin" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Contraseña</label>
+            <input type="password" [(ngModel)]="credentials.password" name="password" class="form-control" placeholder="Ej: admin123" required>
+          </div>
+          <button type="submit" class="btn btn-rojo w-100 py-2 mt-2">Acceder</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
