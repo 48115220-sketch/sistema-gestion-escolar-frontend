@@ -18,8 +18,8 @@ export class AlumnosComponent implements OnInit {
 
   modoEdicion: boolean = false;
 
-  private apiUrlAlumnos = 'http://localhost:8081/alumnos';
-  private apiUrlCursos = 'http://localhost:8082/cursos';
+  private apiUrlAlumnos = 'http://localhost:8080/alumnos';
+  private apiUrlCursos = 'http://localhost:8080/cursos';
 
   constructor(private http: HttpClient) {}
 
