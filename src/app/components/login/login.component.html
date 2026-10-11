@@ -1,29 +1,58 @@
-<div class="row justify-content-center my-5">
-  <div class="col-md-4">
-    <div class="card card-escuela">
-      <div class="card-body p-4">
-        <div class="text-center mb-3">
-          <img src="assets/img/logoF.png" width="70" class="mb-2">
-          <h4 class="fw-bold" style="color: var(--rojo-escuela);">Ingreso al Sistema</h4>
-          <p class="text-muted small">Ingresa tus credenciales de administración</p>
-        </div>
+﻿<div class="container d-flex justify-content-center align-items-center min-vh-100 py-5">
+  <div class="card p-4 shadow-lg border-0 text-center" style="max-width: 480px; width: 100%; border-radius: 12px;">
+    
+    <div class="mb-3">
+      <img src="assets/logo.png" alt="Logo Escuela" style="height: 75px;" class="mb-2" onError="this.style.display='none'">
+      <h3 class="fw-bold mb-1" style="color: #800000;">Gestión Escolar</h3>
+      <p class="text-muted small">Ingresá con tu cuenta institucional</p>
+    </div>
 
-        <div *ngIf="errorLogin" class="alert alert-danger py-2 small text-center">
-          Usuario o contraseña incorrectos
-        </div>
+    <form (ngSubmit)="login()">
+      <div class="mb-3 text-start">
+        <label class="form-label fw-semibold text-secondary small">Usuario</label>
+        <input type="text" class="form-control form-control-lg fs-6" [(ngModel)]="username" name="username" placeholder="Usuario" required>
+      </div>
 
-        <form (ngSubmit)="onLogin()">
-          <div class="mb-3">
-            <label class="form-label small fw-bold">Usuario</label>
-            <input type="text" [(ngModel)]="credentials.username" name="username" class="form-control" placeholder="Ej: admin" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-bold">Contraseña</label>
-            <input type="password" [(ngModel)]="credentials.password" name="password" class="form-control" placeholder="Ej: admin123" required>
-          </div>
-          <button type="submit" class="btn btn-rojo w-100 py-2 mt-2">Acceder</button>
-        </form>
+      <div class="mb-3 text-start">
+        <label class="form-label fw-semibold text-secondary small">Contraseña</label>
+        <input type="password" class="form-control form-control-lg fs-6" [(ngModel)]="password" name="password" placeholder="Contraseña" required>
+      </div>
+
+      <div *ngIf="errorMessage" class="alert alert-danger py-2 mb-3 small text-center">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" class="btn w-100 py-2 fw-bold shadow-sm text-white" style="background-color: #800000; border-color: #800000;" [disabled]="loading">
+        <span *ngIf="!loading">Acceder</span>
+        <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+      </button>
+    </form>
+
+    <div class="mt-4 pt-3 border-top text-start small">
+      <p class="fw-bold mb-2 text-dark text-center">Prueba rápida por Rol (1 Clic):</p>
+      <div class="d-grid gap-2">
+        <button type="button" class="btn btn-sm text-start d-flex justify-content-between align-items-center" style="border-color: #800000; color: #800000; background-color: #fff8f8;" (click)="loginComo('admin', 'admin777')">
+          <span><strong>admin</strong> (ROOT)</span>
+          <span class="badge text-white" style="background-color: #800000;">Acceso Total</span>
+        </button>
+        <button type="button" class="btn btn-outline-primary btn-sm text-start d-flex justify-content-between align-items-center" (click)="loginComo('preceptor', '123456')">
+          <span><strong>preceptor</strong> (PRECEPTOR)</span>
+          <span class="badge bg-primary">Alumnos/Cursos</span>
+        </button>
+        <button type="button" class="btn btn-outline-success btn-sm text-start d-flex justify-content-between align-items-center" (click)="loginComo('docente', '123456')">
+          <span><strong>docente</strong> (DOCENTE)</span>
+          <span class="badge bg-success">Solo Cursos/Notas</span>
+        </button>
+        <button type="button" class="btn btn-outline-warning btn-sm text-start d-flex justify-content-between align-items-center" (click)="loginComo('director', '123456')">
+          <span><strong>director</strong> (DIRECTOR)</span>
+          <span class="badge bg-warning text-dark">Solo Lectura</span>
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm text-start d-flex justify-content-between align-items-center" (click)="loginComo('administrativo', '123456')">
+          <span><strong>administrativo</strong> (ADMIN)</span>
+          <span class="badge bg-secondary">Personal/Alumnos</span>
+        </button>
       </div>
     </div>
+
   </div>
 </div>

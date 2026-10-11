@@ -1,29 +1,48 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+﻿import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: []
+  styles: []
 })
 export class LoginComponent {
-  credentials = { username: '', password: '' };
-  errorLogin = false;
+  username = '';
+  password = '';
+  errorMessage = '';
+  loading = false;
 
-  @Output() loginExitoso = new EventEmitter<void>();
+  constructor(private apiService: ApiService, private router: Router) {}
 
-  constructor(private apiService: ApiService) {}
+  login(): void {
+    if (!this.username || !this.password) {
+      this.errorMessage = 'Por favor, ingrese usuario y contraseña.';
+      return;
+    }
+    this.loading = true;
+    this.errorMessage = '';
 
-  onLogin() {
-    this.apiService.login(this.credentials).subscribe({
-      next: (res: any) => {
-        this.apiService.guardarToken(res.token);
-        this.errorLogin = false;
-        this.loginExitoso.emit();
+    this.apiService.login({ username: this.username, password: this.password }).subscribe({
+      next: (response: any) => {
+        this.loading = false;
+        if (response && response.token) {
+          this.apiService.guardarToken(response.token);
+          this.router.navigate(['/alumnos']);
+        } else {
+          this.errorMessage = 'Respuesta del servidor no válida.';
+        }
       },
-      error: () => {
-        this.errorLogin = true;
+      error: (err: any) => {
+        this.loading = false;
+        this.errorMessage = 'Credenciales incorrectas o servidor no disponible.';
       }
     });
+  }
+
+  loginComo(user: string, pass: string): void {
+    this.username = user;
+    this.password = pass;
+    this.login();
   }
 }

@@ -1,35 +1,48 @@
-import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { AppComponent } from './app.component';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-describe('AppComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule
-      ],
-      declarations: [
-        AppComponent
-      ],
-    }).compileComponents();
-  });
+@Injectable({
+  providedIn: 'root'
+})
+export class ApiService {
+  private baseUrl = 'http://172.100.0.150:8080';
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
+  constructor(private http: HttpClient) {}
 
-  it(`should have as title 'frontend-escuela'`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('frontend-escuela');
-  });
+  login(credentials: any): Observable<any> {
+    return this.http.post(this.baseUrl + '/auth/login', credentials);
+  }
 
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, frontend-escuela');
-  });
-});
+  guardarToken(token: string): void {
+    localStorage.setItem('jwt_token', token);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('jwt_token');
+  }
+
+  getHeaders(): HttpHeaders {
+    const token = this.getToken();
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    });
+  }
+
+  getAlumnos(): Observable<any> {
+    return this.http.get(this.baseUrl + '/alumnos', { headers: this.getHeaders() });
+  }
+
+  crearAlumno(alumno: any): Observable<any> {
+    return this.http.post(this.baseUrl + '/alumnos', alumno, { headers: this.getHeaders() });
+  }
+
+  getCursos(): Observable<any> {
+    return this.http.get(this.baseUrl + '/cursos', { headers: this.getHeaders() });
+  }
+
+  getPersonal(): Observable<any> {
+    return this.http.get(this.baseUrl + '/admin/personal', { headers: this.getHeaders() });
+  }
+}

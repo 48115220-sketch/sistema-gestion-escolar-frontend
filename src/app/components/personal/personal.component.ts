@@ -1,16 +1,20 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-personal',
-  templateUrl: './personal.component.html'
+  templateUrl: './personal.component.html',
+  styleUrls: ['./personal.component.css']
 })
 export class PersonalComponent implements OnInit {
+  apiUrl = 'http://172.100.0.150:8080/admin/personal';
+  personal: any[] = [];
 
-  personalList: any[] = [];
+  get personalList(): any[] {
+    return this.personal;
+  }
 
-  idSeleccionado: number | null = null;
   nombre: string = '';
   apellido: string = '';
   dni: string = '';
@@ -20,86 +24,57 @@ export class PersonalComponent implements OnInit {
 
   modoEdicion: boolean = false;
   cargando: boolean = false;
+  idSeleccionado: number | null = null;
 
-  private apiUrl = 'http://localhost:8080/admin/personal';
-
-  constructor(
-    private http: HttpClient,
-    private apiService: ApiService
-  ) {}
+  constructor(public apiService: ApiService, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.cargarPersonal();
   }
 
-  private getHeaders() {
+  getHeaders() {
     const token = this.apiService.obtenerToken();
-    let headers = new HttpHeaders({
-      'Content-Type': 'application/json'
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
     });
-
-    if (token && token !== 'null' && token !== 'undefined') {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-
-    return headers;
   }
 
   cargarPersonal() {
-    this.http.get<any[]>(this.apiUrl, { headers: this.getHeaders() }).subscribe({
-      next: (data) => this.personalList = data,
-      error: (err) => console.error('Error al cargar personal', err)
+    this.http.get(this.apiUrl, { headers: this.getHeaders() }).subscribe({
+      next: (data: any) => this.personal = data,
+      error: (err) => console.error(err)
     });
   }
 
   guardarPersonal() {
-    if (!this.nombre.trim() || !this.apellido.trim() || !this.dni.trim()) {
-      alert('Por favor complete los campos obligatorios (Nombre, Apellido y DNI).');
-      return;
-    }
-
-    if (this.cargando) return;
-
-    let sueldoNumerico: number | null = null;
-    if (this.sueldo !== null && this.sueldo !== undefined) {
-      const sueldoLimpio = String(this.sueldo).replace(/\./g, '').replace(',', '.');
-      sueldoNumerico = parseFloat(sueldoLimpio);
-    }
-
-    const docenteDTO = {
+    this.cargando = true;
+    const dto = {
       nombre: this.nombre,
       apellido: this.apellido,
       dni: this.dni,
-      sueldo: isNaN(sueldoNumerico!) ? 0 : sueldoNumerico,
+      sueldo: this.sueldo,
       cargo: this.cargo,
-      tipo: this.tipo 
+      tipo: this.tipo
     };
 
-    this.cargando = true;
-
     if (this.modoEdicion && this.idSeleccionado !== null) {
-      this.http.put(`${this.apiUrl}/${this.idSeleccionado}`, docenteDTO, { headers: this.getHeaders() }).subscribe({
+      this.http.put(this.apiUrl + '/' + this.idSeleccionado, dto, { headers: this.getHeaders() }).subscribe({
         next: () => {
           this.cargarPersonal();
           this.limpiarFormulario();
           this.cargando = false;
         },
-        error: (err) => {
-          console.error('Error al actualizar personal', err);
-          this.cargando = false;
-        }
+        error: () => { this.cargando = false; }
       });
     } else {
-      this.http.post(this.apiUrl, docenteDTO, { headers: this.getHeaders() }).subscribe({
+      this.http.post(this.apiUrl, dto, { headers: this.getHeaders() }).subscribe({
         next: () => {
           this.cargarPersonal();
           this.limpiarFormulario();
           this.cargando = false;
         },
-        error: (err) => {
-          console.error('Error al crear personal', err);
-          this.cargando = false;
-        }
+        error: () => { this.cargando = false; }
       });
     }
   }
@@ -116,12 +91,9 @@ export class PersonalComponent implements OnInit {
   }
 
   eliminarPersonal(id: number) {
-    if (confirm('¿Eliminar este registro de personal?')) {
-      this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getHeaders() }).subscribe({
-        next: () => this.cargarPersonal(),
-        error: (err) => console.error('Error al eliminar personal', err)
-      });
-    }
+    this.http.delete(this.apiUrl + '/' + id, { headers: this.getHeaders() }).subscribe({
+      next: () => this.cargarPersonal()
+    });
   }
 
   limpiarFormulario() {

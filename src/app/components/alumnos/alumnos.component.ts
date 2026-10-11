@@ -1,52 +1,53 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-alumnos',
-  templateUrl: './alumnos.component.html'
+  templateUrl: './alumnos.component.html',
+  styleUrls: ['./alumnos.component.css']
 })
 export class AlumnosComponent implements OnInit {
+  apiUrlAlumnos = 'http://172.100.0.150:8080/alumnos';
+  apiUrlCursos = 'http://172.100.0.150:8080/cursos';
 
   alumnos: any[] = [];
   cursos: any[] = [];
 
-  idSeleccionado: number | null = null; 
   nombre: string = '';
   apellido: string = '';
   dni: string = '';
-  cursoId: number | null = null; 
+  cursoId: number | null = null;
 
   modoEdicion: boolean = false;
+  idSeleccionado: number | null = null;
 
-  private apiUrlAlumnos = 'http://localhost:8080/alumnos';
-  private apiUrlCursos = 'http://localhost:8080/cursos';
-
-  constructor(private http: HttpClient) {}
+  constructor(public apiService: ApiService, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.cargarAlumnos();
     this.cargarCursos();
   }
 
-  private getHeaders() {
+  getHeaders() {
     const token = localStorage.getItem('jwt_token');
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': 'Bearer ' + token
     });
   }
 
   cargarAlumnos() {
-    this.http.get<any[]>(this.apiUrlAlumnos, { headers: this.getHeaders() }).subscribe({
-      next: (data) => this.alumnos = data,
-      error: (err) => console.error('Error al cargar alumnos', err)
+    this.http.get(this.apiUrlAlumnos, { headers: this.getHeaders() }).subscribe({
+      next: (data: any) => this.alumnos = data,
+      error: (err) => console.error(err)
     });
   }
 
   cargarCursos() {
-    this.http.get<any[]>(this.apiUrlCursos, { headers: this.getHeaders() }).subscribe({
-      next: (data) => this.cursos = data,
-      error: (err) => console.error('Error al cargar cursos', err)
+    this.http.get(this.apiUrlCursos, { headers: this.getHeaders() }).subscribe({
+      next: (data: any) => this.cursos = data,
+      error: (err) => console.error(err)
     });
   }
 
@@ -59,25 +60,23 @@ export class AlumnosComponent implements OnInit {
     };
 
     if (this.modoEdicion && this.idSeleccionado !== null) {
-      this.http.put(`${this.apiUrlAlumnos}/${this.idSeleccionado}`, alumnoDTO, { headers: this.getHeaders() }).subscribe({
+      this.http.put(this.apiUrlAlumnos + '/' + this.idSeleccionado, alumnoDTO, { headers: this.getHeaders() }).subscribe({
         next: () => {
           this.cargarAlumnos();
           this.limpiarFormulario();
-        },
-        error: (err) => console.error('Error al actualizar alumno', err)
+        }
       });
     } else {
       this.http.post(this.apiUrlAlumnos, alumnoDTO, { headers: this.getHeaders() }).subscribe({
         next: () => {
           this.cargarAlumnos();
           this.limpiarFormulario();
-        },
-        error: (err) => console.error('Error al crear alumno', err)
+        }
       });
     }
   }
 
-  seleccionarParaEditar(alumno: any) {
+  editarAlumno(alumno: any) {
     this.modoEdicion = true;
     this.idSeleccionado = alumno.id;
     this.nombre = alumno.nombre;
@@ -86,13 +85,14 @@ export class AlumnosComponent implements OnInit {
     this.cursoId = alumno.cursoId;
   }
 
+  seleccionarParaEditar(alumno: any) {
+    this.editarAlumno(alumno);
+  }
+
   eliminarAlumno(id: number) {
-    if (confirm('¿Eliminar alumno?')) {
-      this.http.delete(`${this.apiUrlAlumnos}/${id}`, { headers: this.getHeaders() }).subscribe({
-        next: () => this.cargarAlumnos(),
-        error: (err) => console.error('Error al eliminar alumno', err)
-      });
-    }
+    this.http.delete(this.apiUrlAlumnos + '/' + id, { headers: this.getHeaders() }).subscribe({
+      next: () => this.cargarAlumnos()
+    });
   }
 
   limpiarFormulario() {

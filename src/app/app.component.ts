@@ -4,11 +4,14 @@ import { ApiService } from './services/api.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: []
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  title = 'frontend-escuela';
+
   constructor(public apiService: ApiService) {}
 
   onLoginExitoso() {
+    window.location.reload();
   }
 }

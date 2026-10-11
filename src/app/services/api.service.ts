@@ -1,53 +1,65 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+﻿import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ApiService {
+  private baseUrl = `http://${window.location.hostname}:8080`;
 
-  private baseUrl = 'http://localhost:8080';
+  constructor(private http: HttpClient) {}
 
-  constructor(private http: HttpClient) { }
-
-  login(credentials: {username: string, password: string}): Observable<any> {
+  login(credentials: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/auth/login`, credentials);
   }
 
-  guardarToken(token: string) {
+  guardarToken(token: string): void {
     localStorage.setItem('jwt_token', token);
   }
 
-  obtenerToken(): string | null {
+  getToken(): string | null {
     return localStorage.getItem('jwt_token');
   }
 
-  logout() {
+  obtenerToken(): string | null {
+    return this.getToken();
+  }
+
+  logout(): void {
     localStorage.removeItem('jwt_token');
   }
 
-  private getHeaders(): HttpHeaders {
-    const token = this.obtenerToken();
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
+  obtenerRol(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const rawRol = payload.rol || payload.role || (payload.roles && payload.roles[0]) || 'USUARIO';
+      return rawRol.replace('ROLE_', '').toUpperCase();
+    } catch {
+      return 'USUARIO';
+    }
+  }
+
+  tieneRol(rolesPermitidos: string[]): boolean {
+    const rol = this.obtenerRol();
+    if (!rol) return false;
+    const rolesNormalizados = rolesPermitidos.map(r => r.replace('ROLE_', '').toUpperCase());
+    return rolesNormalizados.includes(rol) || rol === 'ROOT';
   }
 
   getAlumnos(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/alumnos`, { headers: this.getHeaders() });
+    return this.http.get(`${this.baseUrl}/alumnos`);
   }
 
   crearAlumno(alumno: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/alumnos`, alumno, { headers: this.getHeaders() });
+    return this.http.post(`${this.baseUrl}/alumnos`, alumno);
   }
 
   getCursos(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/cursos`, { headers: this.getHeaders() });
+    return this.http.get(`${this.baseUrl}/cursos`);
   }
 
   getPersonal(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/admin/personal`, { headers: this.getHeaders() });
+    return this.http.get(`${this.baseUrl}/admin/personal`);
   }
 }

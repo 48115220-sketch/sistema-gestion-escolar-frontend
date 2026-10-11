@@ -1,40 +1,40 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-cursos',
-  templateUrl: './cursos.component.html'
+  templateUrl: './cursos.component.html',
+  styleUrls: ['./cursos.component.css']
 })
 export class CursosComponent implements OnInit {
+  apiUrl = 'http://172.100.0.150:8080/cursos';
 
   cursos: any[] = [];
-
-  idSeleccionado: number | null = null; 
   nombre: string = '';
-  docenteId: number | null = null; 
+  docenteId: number | null = null;
 
   modoEdicion: boolean = false;
+  idSeleccionado: number | null = null;
 
-  private apiUrl = 'http://localhost:8080/cursos';
-
-  constructor(private http: HttpClient) {}
+  constructor(public apiService: ApiService, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.cargarCursos();
   }
 
-  private getHeaders() {
+  getHeaders() {
     const token = localStorage.getItem('jwt_token');
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': 'Bearer ' + token
     });
   }
 
   cargarCursos() {
-    this.http.get<any[]>(this.apiUrl, { headers: this.getHeaders() }).subscribe({
-      next: (data) => this.cursos = data,
-      error: (err) => console.error('Error al cargar cursos', err)
+    this.http.get(this.apiUrl, { headers: this.getHeaders() }).subscribe({
+      next: (data: any) => this.cursos = data,
+      error: (err) => console.error(err)
     });
   }
 
@@ -45,38 +45,37 @@ export class CursosComponent implements OnInit {
     };
 
     if (this.modoEdicion && this.idSeleccionado !== null) {
-      this.http.put(`${this.apiUrl}/${this.idSeleccionado}`, cursoDTO, { headers: this.getHeaders() }).subscribe({
+      this.http.put(this.apiUrl + '/' + this.idSeleccionado, cursoDTO, { headers: this.getHeaders() }).subscribe({
         next: () => {
           this.cargarCursos();
           this.limpiarFormulario();
-        },
-        error: (err) => console.error('Error al actualizar curso', err)
+        }
       });
     } else {
       this.http.post(this.apiUrl, cursoDTO, { headers: this.getHeaders() }).subscribe({
         next: () => {
           this.cargarCursos();
           this.limpiarFormulario();
-        },
-        error: (err) => console.error('Error al crear curso', err)
+        }
       });
     }
   }
 
-  seleccionarParaEditar(curso: any) {
+  editarCurso(curso: any) {
     this.modoEdicion = true;
     this.idSeleccionado = curso.id;
     this.nombre = curso.nombre;
     this.docenteId = curso.docenteId;
   }
 
+  seleccionarParaEditar(curso: any) {
+    this.editarCurso(curso);
+  }
+
   eliminarCurso(id: number) {
-    if (confirm('¿Eliminar curso?')) {
-      this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getHeaders() }).subscribe({
-        next: () => this.cargarCursos(),
-        error: (err) => console.error('Error al eliminar curso', err)
-      });
-    }
+    this.http.delete(this.apiUrl + '/' + id, { headers: this.getHeaders() }).subscribe({
+      next: () => this.cargarCursos()
+    });
   }
 
   limpiarFormulario() {
