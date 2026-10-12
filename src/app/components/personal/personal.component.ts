@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ApiService } from '../../services/api.service';
 
@@ -8,7 +8,7 @@ import { ApiService } from '../../services/api.service';
   styleUrls: ['./personal.component.css']
 })
 export class PersonalComponent implements OnInit {
-  apiUrl = 'http://172.100.0.150:8080/admin/personal';
+  apiUrl = `http://${window.location.hostname}:8080/admin/personal`;
   personal: any[] = [];
 
   get personalList(): any[] {

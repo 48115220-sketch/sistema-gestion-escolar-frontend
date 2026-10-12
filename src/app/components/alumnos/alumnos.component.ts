@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ApiService } from '../../services/api.service';
 
@@ -8,8 +8,8 @@ import { ApiService } from '../../services/api.service';
   styleUrls: ['./alumnos.component.css']
 })
 export class AlumnosComponent implements OnInit {
-  apiUrlAlumnos = 'http://172.100.0.150:8080/alumnos';
-  apiUrlCursos = 'http://172.100.0.150:8080/cursos';
+  apiUrlAlumnos =`http://${window.location.hostname}:8080/alumnos`;
+  apiUrlCursos = `http://${window.location.hostname}:8080/cursos`;
 
   alumnos: any[] = [];
   cursos: any[] = [];
