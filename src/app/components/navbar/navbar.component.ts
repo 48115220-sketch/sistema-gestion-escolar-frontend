@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 
 @Component({
@@ -7,11 +8,11 @@ import { ApiService } from '../../services/api.service';
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent {
-  constructor(public apiService: ApiService) {}
+  constructor(public apiService: ApiService, private router: Router) {}
 
   logout() {
     this.apiService.logout();
-    window.location.reload();
+    this.router.navigate(['/login']);
   }
 
   onLogout() {
