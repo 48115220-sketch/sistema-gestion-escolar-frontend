@@ -8,7 +8,7 @@ import { ApiService } from '../../services/api.service';
   styleUrls: ['./alumnos.component.css']
 })
 export class AlumnosComponent implements OnInit {
-  apiUrlAlumnos =`http://${window.location.hostname}:8080/alumnos`;
+  apiUrlAlumnos = `http://${window.location.hostname}:8080/alumnos`;
   apiUrlCursos = `http://${window.location.hostname}:8080/cursos`;
 
   alumnos: any[] = [];
@@ -89,10 +89,43 @@ export class AlumnosComponent implements OnInit {
     this.editarAlumno(alumno);
   }
 
-  eliminarAlumno(id: number) {
+  esAlumnoActivo(alumno: any): boolean {
+    if (alumno.estado) {
+      return alumno.estado.toUpperCase() === 'HABILITADO' || alumno.estado.toUpperCase() === 'ACTIVO';
+    }
+    if (alumno.activo !== undefined && alumno.activo !== null) {
+      return Boolean(alumno.activo);
+    }
+    if (alumno.habilitado !== undefined && alumno.habilitado !== null) {
+      return Boolean(alumno.habilitado);
+    }
+    return true;
+  }
+
+  deshabilitarAlumno(id: number) {
     this.http.delete(this.apiUrlAlumnos + '/' + id, { headers: this.getHeaders() }).subscribe({
-      next: () => this.cargarAlumnos()
+      next: () => this.cargarAlumnos(),
+      error: (err) => console.error('Error al deshabilitar:', err)
     });
+  }
+
+  habilitarAlumno(alumno: any) {
+    const alumnoDTO = {
+      nombre: alumno.nombre,
+      apellido: alumno.apellido,
+      dni: alumno.dni,
+      cursoId: alumno.cursoId,
+      estado: 'HABILITADO',
+      activo: true
+    };
+    this.http.put(this.apiUrlAlumnos + '/' + alumno.id, alumnoDTO, { headers: this.getHeaders() }).subscribe({
+      next: () => this.cargarAlumnos(),
+      error: (err) => console.error('Error al habilitar:', err)
+    });
+  }
+
+  eliminarAlumno(id: number) {
+    this.deshabilitarAlumno(id);
   }
 
   limpiarFormulario() {

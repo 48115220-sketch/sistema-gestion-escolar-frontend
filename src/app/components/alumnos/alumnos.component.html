@@ -1,4 +1,4 @@
-﻿<div class="card p-3 mb-4 shadow-sm" *ngIf="apiService.tieneRol(['PRECEPTOR', 'ADMINISTRATIVO'])">
+﻿<div class="card p-3 mb-4 shadow-sm" *ngIf="apiService.tieneRol(['PRECEPTOR', 'ADMINISTRATIVO', 'ROOT'])">
   <h4 class="text-danger">{{ modoEdicion ? 'Editar Alumno' : 'Registrar Alumno' }}</h4>
   <div class="row g-2">
     <div class="col-12 col-sm-6 col-md-3">
@@ -34,7 +34,8 @@
           <th>Apellido</th>
           <th>Documento</th>
           <th>Curso ID</th>
-          <th class="text-center" *ngIf="apiService.tieneRol(['PRECEPTOR', 'ADMINISTRATIVO'])">Acciones</th>
+          <th class="text-center">Estado</th>
+          <th class="text-center" *ngIf="apiService.tieneRol(['PRECEPTOR', 'ADMINISTRATIVO', 'ROOT'])">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -44,10 +45,16 @@
           <td>{{ a.apellido }}</td>
           <td>{{ a.dni }}</td>
           <td>{{ a.cursoId }}</td>
-          <td class="text-center" *ngIf="apiService.tieneRol(['PRECEPTOR', 'ADMINISTRATIVO'])">
+          <td class="text-center">
+            <span class="badge" [ngClass]="esAlumnoActivo(a) ? 'bg-success' : 'bg-danger'">
+              {{ esAlumnoActivo(a) ? 'HABILITADO' : 'DESHABILITADO' }}
+            </span>
+          </td>
+          <td class="text-center" *ngIf="apiService.tieneRol(['PRECEPTOR', 'ADMINISTRATIVO', 'ROOT'])">
             <div class="d-flex justify-content-center gap-1">
               <button (click)="seleccionarParaEditar(a)" class="btn btn-warning btn-sm">Editar</button>
-              <button (click)="eliminarAlumno(a.id)" class="btn btn-danger btn-sm">Deshabilitar</button>
+              <button *ngIf="esAlumnoActivo(a)" (click)="deshabilitarAlumno(a.id)" class="btn btn-danger btn-sm">Deshabilitar</button>
+              <button *ngIf="!esAlumnoActivo(a)" (click)="habilitarAlumno(a)" class="btn btn-success btn-sm">Habilitar</button>
             </div>
           </td>
         </tr>
