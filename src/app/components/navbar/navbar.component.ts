@@ -10,12 +10,8 @@ import { ApiService } from '../../services/api.service';
 export class NavbarComponent {
   constructor(public apiService: ApiService, private router: Router) {}
 
-  logout() {
+  onLogout(): void {
     this.apiService.logout();
     this.router.navigate(['/login']);
-  }
-
-  onLogout() {
-    this.logout();
   }
 }

@@ -1,4 +1,4 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ApiService } from '../../services/api.service';
 
@@ -29,29 +29,29 @@ export class AlumnosComponent implements OnInit {
     this.cargarCursos();
   }
 
-  getHeaders() {
+  getHeaders(): HttpHeaders {
     const token = localStorage.getItem('jwt_token');
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + token
+      'Authorization': 'Bearer ' + (token || '')
     });
   }
 
-  cargarAlumnos() {
+  cargarAlumnos(): void {
     this.http.get(this.apiUrlAlumnos, { headers: this.getHeaders() }).subscribe({
       next: (data: any) => this.alumnos = data,
-      error: (err) => console.error(err)
+      error: (err) => console.error('Error al cargar alumnos:', err)
     });
   }
 
-  cargarCursos() {
+  cargarCursos(): void {
     this.http.get(this.apiUrlCursos, { headers: this.getHeaders() }).subscribe({
       next: (data: any) => this.cursos = data,
-      error: (err) => console.error(err)
+      error: (err) => console.error('Error al cargar cursos:', err)
     });
   }
 
-  guardarAlumno() {
+  guardarAlumno(): void {
     const alumnoDTO = {
       nombre: this.nombre,
       apellido: this.apellido,
@@ -60,23 +60,25 @@ export class AlumnosComponent implements OnInit {
     };
 
     if (this.modoEdicion && this.idSeleccionado !== null) {
-      this.http.put(this.apiUrlAlumnos + '/' + this.idSeleccionado, alumnoDTO, { headers: this.getHeaders() }).subscribe({
+      this.http.put(`${this.apiUrlAlumnos}/${this.idSeleccionado}`, alumnoDTO, { headers: this.getHeaders() }).subscribe({
         next: () => {
           this.cargarAlumnos();
           this.limpiarFormulario();
-        }
+        },
+        error: (err) => console.error('Error al actualizar alumno:', err)
       });
     } else {
       this.http.post(this.apiUrlAlumnos, alumnoDTO, { headers: this.getHeaders() }).subscribe({
         next: () => {
           this.cargarAlumnos();
           this.limpiarFormulario();
-        }
+        },
+        error: (err) => console.error('Error al guardar alumno:', err)
       });
     }
   }
 
-  editarAlumno(alumno: any) {
+  editarAlumno(alumno: any): void {
     this.modoEdicion = true;
     this.idSeleccionado = alumno.id;
     this.nombre = alumno.nombre;
@@ -85,50 +87,49 @@ export class AlumnosComponent implements OnInit {
     this.cursoId = alumno.cursoId;
   }
 
-  seleccionarParaEditar(alumno: any) {
+  seleccionarParaEditar(alumno: any): void {
     this.editarAlumno(alumno);
   }
 
   esAlumnoActivo(alumno: any): boolean {
+    if (!alumno) return false;
     if (alumno.estado) {
       return alumno.estado.toUpperCase() === 'HABILITADO' || alumno.estado.toUpperCase() === 'ACTIVO';
     }
     if (alumno.activo !== undefined && alumno.activo !== null) {
       return Boolean(alumno.activo);
     }
-    if (alumno.habilitado !== undefined && alumno.habilitado !== null) {
-      return Boolean(alumno.habilitado);
-    }
     return true;
   }
 
-  deshabilitarAlumno(id: number) {
-    this.http.delete(this.apiUrlAlumnos + '/' + id, { headers: this.getHeaders() }).subscribe({
+  deshabilitarAlumno(id: number): void {
+    this.http.delete(`${this.apiUrlAlumnos}/${id}`, { headers: this.getHeaders() }).subscribe({
       next: () => this.cargarAlumnos(),
       error: (err) => console.error('Error al deshabilitar:', err)
     });
   }
 
-  habilitarAlumno(alumno: any) {
+  habilitarAlumno(alumno: any): void {
     const alumnoDTO = {
       nombre: alumno.nombre,
       apellido: alumno.apellido,
       dni: alumno.dni,
       cursoId: alumno.cursoId,
-      estado: 'HABILITADO',
-      activo: true
+      estado: 'HABILITADO'
     };
-    this.http.put(this.apiUrlAlumnos + '/' + alumno.id, alumnoDTO, { headers: this.getHeaders() }).subscribe({
+    this.http.put(`${this.apiUrlAlumnos}/${alumno.id}`, alumnoDTO, { headers: this.getHeaders() }).subscribe({
       next: () => this.cargarAlumnos(),
       error: (err) => console.error('Error al habilitar:', err)
     });
   }
 
-  eliminarAlumno(id: number) {
-    this.deshabilitarAlumno(id);
+  obtenerNombreCurso(cursoId: any): string {
+    if (!cursoId) return 'Sin Asignar';
+    const c = this.cursos.find(item => item.id === cursoId || item.id === Number(cursoId));
+    return c ? c.nombre : `Curso #${cursoId}`;
   }
 
-  limpiarFormulario() {
+  limpiarFormulario(): void {
     this.modoEdicion = false;
     this.idSeleccionado = null;
     this.nombre = '';

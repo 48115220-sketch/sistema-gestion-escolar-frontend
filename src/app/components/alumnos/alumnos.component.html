@@ -1,19 +1,23 @@
-﻿<div class="card p-3 mb-4 shadow-sm" *ngIf="apiService.tieneRol(['PRECEPTOR', 'ADMINISTRATIVO', 'ROOT'])">
+<div class="card p-3 mb-4 shadow-sm" *ngIf="apiService.tieneRol(['PRECEPTOR', 'ADMINISTRATIVO', 'ROOT'])">
   <h4 class="text-danger">{{ modoEdicion ? 'Editar Alumno' : 'Registrar Alumno' }}</h4>
   <div class="row g-2">
     <div class="col-12 col-sm-6 col-md-3">
+      <label class="form-label fw-bold">Nombre</label>
       <input type="text" [(ngModel)]="nombre" placeholder="Nombre" class="form-control">
     </div>
     <div class="col-12 col-sm-6 col-md-3">
+      <label class="form-label fw-bold">Apellido</label>
       <input type="text" [(ngModel)]="apellido" placeholder="Apellido" class="form-control">
     </div>
     <div class="col-12 col-sm-6 col-md-3">
-      <input type="text" [(ngModel)]="dni" placeholder="Documento" class="form-control">
+      <label class="form-label fw-bold">Documento</label>
+      <input type="text" [(ngModel)]="dni" placeholder="Documento / DNI" class="form-control">
     </div>
     <div class="col-12 col-sm-6 col-md-3">
+      <label class="form-label fw-bold">Curso Asignado</label>
       <select [(ngModel)]="cursoId" class="form-select">
         <option [ngValue]="null" disabled selected>Seleccione Curso</option>
-        <option *ngFor="let c of cursos" [value]="c.id">{{ c.nombre }}</option>
+        <option *ngFor="let c of cursos" [value]="c.id">{{ c.nombre }} (Vacantes: {{ c.cupo !== undefined ? c.cupo : 30 }})</option>
       </select>
     </div>
   </div>
@@ -24,7 +28,10 @@
 </div>
 
 <div class="card p-3 mb-4 shadow-sm">
-  <h4>Alumnos Registrados</h4>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h4 class="mb-0">Alumnos Registrados</h4>
+    <button class="btn btn-sm btn-outline-secondary" (click)="cargarAlumnos()">Actualizar Lista</button>
+  </div>
   <div class="table-responsive" *ngIf="alumnos.length > 0">
     <table class="table table-striped align-middle mt-2 mb-0">
       <thead class="table-light">
@@ -33,7 +40,7 @@
           <th>Nombre</th>
           <th>Apellido</th>
           <th>Documento</th>
-          <th>Curso ID</th>
+          <th>Curso Asignado</th>
           <th class="text-center">Estado</th>
           <th class="text-center" *ngIf="apiService.tieneRol(['PRECEPTOR', 'ADMINISTRATIVO', 'ROOT'])">Acciones</th>
         </tr>
@@ -44,7 +51,10 @@
           <td>{{ a.nombre }}</td>
           <td>{{ a.apellido }}</td>
           <td>{{ a.dni }}</td>
-          <td>{{ a.cursoId }}</td>
+          <td>
+            <span *ngIf="a.curso" class="badge bg-primary">{{ a.curso.nombre }}</span>
+            <span *ngIf="!a.curso" class="badge bg-secondary">{{ obtenerNombreCurso(a.cursoId) }}</span>
+          </td>
           <td class="text-center">
             <span class="badge" [ngClass]="esAlumnoActivo(a) ? 'bg-success' : 'bg-danger'">
               {{ esAlumnoActivo(a) ? 'HABILITADO' : 'DESHABILITADO' }}
